@@ -59,6 +59,11 @@ mcp-riskmap scan . --exclude "examples/**" --exclude "tests/**"
 
 Use `--exclude` for reviewed fixture directories, generated output, or intentionally unsafe examples that should not block CI.
 
+## Examples
+
+- `examples/unsafe-mcp-server/` contains intentionally risky MCP config and tool-handler patterns for scanner demonstrations.
+- `examples/safe-mcp-server/` contains a safer file-read pattern using a resolved base directory boundary check.
+
 ## Example output
 
 ```text
