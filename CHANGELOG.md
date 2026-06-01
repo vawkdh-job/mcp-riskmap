@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.2 - 2026-06-01
+
 ### Added
 
 - Inline `mcp-riskmap: ignore RULE-ID` suppressions for reviewed findings.
