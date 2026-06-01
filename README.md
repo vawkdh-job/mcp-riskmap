@@ -34,7 +34,7 @@ python -m pip install -e .
 From GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.1.1"
+python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.1.2"
 ```
 
 For development without installing:
@@ -109,7 +109,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4
-      - uses: vawkdh-job/mcp-riskmap@v0.1.1
+      - uses: vawkdh-job/mcp-riskmap@v0.1.2
         with:
           path: .
           format: sarif
