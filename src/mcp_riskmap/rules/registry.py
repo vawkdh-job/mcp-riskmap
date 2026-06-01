@@ -1,0 +1,15 @@
+RULES = {
+    "MCP-CONFIG-SHELL": "MCP config starts a server through a shell wrapper.",
+    "MCP-CONFIG-REMOTE-INSTALL": "MCP config downloads and executes remote content.",
+    "MCP-CONFIG-SECRET-ENV": "MCP config passes secret-like environment variables.",
+    "MCP-CONFIG-NPX-LATEST": "MCP config runs npx -y without an explicit review gate.",
+    "PY-SHELL-TRUE": "Python source uses subprocess with shell=True.",
+    "PY-OS-SYSTEM": "Python source uses os.system.",
+    "PY-EVAL-EXEC": "Python source uses eval or exec.",
+    "JS-CHILD-PROCESS-EXEC": "JavaScript source uses child_process.exec.",
+    "JS-SPAWN-SHELL": "JavaScript source uses spawn with shell enabled.",
+    "TOOL-DESCRIPTION-INJECTION": "Tool text contains prompt-injection-like wording.",
+    "REPO-MISSING-AGENTS": "Repository does not define agent guidance.",
+    "REPO-MISSING-SECURITY": "Repository does not define vulnerability reporting guidance.",
+    "REPO-MISSING-LICENSE": "Repository does not define an open-source license.",
+}
