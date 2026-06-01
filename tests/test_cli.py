@@ -1,6 +1,8 @@
 import io
+import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
 
 from mcp_riskmap import __version__
 from mcp_riskmap.cli import main
@@ -15,6 +17,16 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(0, code)
         self.assertIn(__version__, stdout.getvalue())
+
+    def test_scan_missing_path_returns_input_error(self):
+        stderr = io.StringIO()
+        missing_path = Path(tempfile.gettempdir()) / "mcp-riskmap-missing-target"
+
+        with redirect_stderr(stderr):
+            code = main(["scan", str(missing_path)])
+
+        self.assertEqual(2, code)
+        self.assertIn("does not exist", stderr.getvalue())
 
 
 if __name__ == "__main__":
