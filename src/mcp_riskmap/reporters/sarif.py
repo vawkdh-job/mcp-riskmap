@@ -45,7 +45,7 @@ def render_sarif(result: ScanResult) -> str:
                 "tool": {
                     "driver": {
                         "name": "mcp-riskmap",
-                        "informationUri": "https://github.com/kdh/mcp-riskmap",
+                        "informationUri": "https://github.com/vawkdh-job/mcp-riskmap",
                         "rules": list(rules.values()),
                     }
                 },
