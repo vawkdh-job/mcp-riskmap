@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from mcp_riskmap.redaction import redact_text
+
 
 SEVERITY_ORDER = {
     "info": 0,
@@ -34,7 +36,7 @@ class Finding:
             "path": self.path,
             "line": self.line,
             "remediation": self.remediation,
-            "evidence": self.evidence,
+            "evidence": redact_text(self.evidence),
         }
 
 
