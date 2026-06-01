@@ -29,5 +29,11 @@ classifiers = [
 [project.scripts]
 mcp-riskmap = "mcp_riskmap.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/vawkdh-job/mcp-riskmap"
+Repository = "https://github.com/vawkdh-job/mcp-riskmap"
+Issues = "https://github.com/vawkdh-job/mcp-riskmap/issues"
+Changelog = "https://github.com/vawkdh-job/mcp-riskmap/blob/main/CHANGELOG.md"
+
 [tool.setuptools.packages.find]
 where = ["src"]
