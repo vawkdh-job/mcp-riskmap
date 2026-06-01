@@ -30,6 +30,7 @@ The intended workflow is:
 - GitHub Action wrapper in `action.yml`.
 - CI matrix for Python 3.10, 3.11, and 3.12 plus package build validation.
 - Security policy, contribution guide, AGENTS.md, issue templates, changelog, roadmap, and tagged releases.
+- Demo review artifact for an intentionally unsafe MCP fixture: [demo-unsafe-report.md](demo-unsafe-report.md).
 
 ## Codex and API credit use
 
