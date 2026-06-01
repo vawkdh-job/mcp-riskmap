@@ -108,6 +108,6 @@ See [ROADMAP.md](ROADMAP.md) for issue-sized milestones.
 
 ## OpenAI Codex for OSS fit
 
-This project is intended to be maintained as an open-source security and maintainer automation tool. It includes tests, CI, SARIF output, examples, security docs, contribution guidance, AGENTS.md, and a v0.1.0 release.
+This project is intended to be maintained as an open-source security and maintainer automation tool. It includes tests, CI, SARIF output, examples, security docs, contribution guidance, AGENTS.md, and tagged releases.
 
 Codex/API credits would be useful for reviewing rule changes, generating regression tests, triaging issues, improving documentation, and producing release notes. AI output should be reviewed by maintainers before merge.
