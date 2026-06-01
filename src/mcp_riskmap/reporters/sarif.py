@@ -1,21 +1,33 @@
 from __future__ import annotations
 
+import hashlib
 import json
 
 from mcp_riskmap.models import ScanResult
+from mcp_riskmap.redaction import redact_text
+from mcp_riskmap.rules.registry import RULES
 
 
 def render_sarif(result: ScanResult) -> str:
     rules = {}
     sarif_results = []
     for finding in result.findings:
+        metadata = RULES.metadata_for(finding.rule_id)
         rules[finding.rule_id] = {
             "id": finding.rule_id,
             "name": finding.title,
             "shortDescription": {"text": finding.title},
             "fullDescription": {"text": finding.remediation or finding.message},
+            "helpUri": metadata.help_uri,
+            "help": {"text": metadata.description},
             "defaultConfiguration": {"level": _level_for(finding.severity)},
+            "properties": {
+                "precision": metadata.precision,
+                "security-severity": metadata.security_severity,
+                "tags": list(metadata.tags),
+            },
         }
+        fingerprint = _fingerprint_for(finding)
         sarif_results.append(
             {
                 "ruleId": finding.rule_id,
@@ -29,10 +41,16 @@ def render_sarif(result: ScanResult) -> str:
                         }
                     }
                 ],
+                "partialFingerprints": {
+                    "primaryLocationLineHash": fingerprint,
+                },
                 "properties": {
                     "severity": finding.severity,
-                    "evidence": finding.evidence,
+                    "evidence": redact_text(finding.evidence),
                     "remediation": finding.remediation,
+                    "precision": metadata.precision,
+                    "security-severity": metadata.security_severity,
+                    "tags": list(metadata.tags),
                 },
             }
         )
@@ -49,6 +67,7 @@ def render_sarif(result: ScanResult) -> str:
                         "rules": list(rules.values()),
                     }
                 },
+                "automationDetails": {"id": "mcp-riskmap"},
                 "results": sarif_results,
             }
         ],
@@ -62,3 +81,8 @@ def _level_for(severity: str) -> str:
     if severity == "medium":
         return "warning"
     return "note"
+
+
+def _fingerprint_for(finding) -> str:
+    source = f"{finding.rule_id}\0{finding.path}\0{finding.line}\0{finding.message}"
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()[:32]
