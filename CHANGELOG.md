@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.1 - 2026-06-01
+
 ### Added
 
 - SARIF rule help links, rule metadata, and partial fingerprints for GitHub Code Scanning.
