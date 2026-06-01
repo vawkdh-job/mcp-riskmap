@@ -21,12 +21,13 @@
 - The scanner reads files and does not start MCP servers.
 - The scanner does not send scanned content to external services.
 - Findings include remediation text so maintainers can make explicit risk decisions.
-- SARIF output is intended for GitHub Code Scanning and should not include secret values beyond minimal evidence snippets.
+- Secret-like evidence is redacted in structured output before JSON or SARIF is written.
+- SARIF output is intended for GitHub Code Scanning and includes rule help links, severity metadata, and stable partial fingerprints.
 
 ## Out of scope
 
 - Runtime sandboxing
 - Dynamic MCP protocol interaction
 - Malware classification
-- Secret scanning with high-entropy detection
+- Secret scanning with high-entropy detection beyond key-name based redaction
 - Full taint analysis
