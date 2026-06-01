@@ -1,0 +1,30 @@
+name: mcp-riskmap
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - run: >
+          mcp-riskmap scan .
+          --format sarif
+          --output mcp-riskmap.sarif
+          --fail-on high
+          --exclude "examples/**"
+          --exclude "tests/**"
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: mcp-riskmap.sarif

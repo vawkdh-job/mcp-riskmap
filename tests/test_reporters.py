@@ -53,6 +53,7 @@ class ReporterTests(unittest.TestCase):
         self.assertIn("server.py", render_table(result))
 
 
+# mcp-riskmap: ignore PY-SHELL-TRUE
 def _sample_result(evidence: str = "subprocess.run(command, shell=True)") -> ScanResult:
     return ScanResult(
         root=Path(tempfile.gettempdir()),

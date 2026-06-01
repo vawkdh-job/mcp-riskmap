@@ -42,6 +42,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     scan.add_argument("--output", help="Write report to a file instead of stdout.")
     scan.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Exclude a relative path glob from scanning. Can be passed more than once.",
+    )
+    scan.add_argument(
         "--fail-on",
         choices=list(SEVERITY_ORDER),
         help="Return exit code 1 when any finding is at or above this severity.",
@@ -51,7 +57,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _scan(args: argparse.Namespace) -> int:
     try:
-        result = scan_path(args.path)
+        result = scan_path(args.path, exclude_patterns=args.exclude)
     except ScanInputError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
