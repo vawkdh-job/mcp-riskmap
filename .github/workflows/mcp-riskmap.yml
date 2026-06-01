@@ -1,0 +1,28 @@
+name: mcp-riskmap
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          path: .
+          format: sarif
+          output: mcp-riskmap.sarif
+          fail-on: high
+          exclude: |
+            examples/**
+            tests/**
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: mcp-riskmap.sarif

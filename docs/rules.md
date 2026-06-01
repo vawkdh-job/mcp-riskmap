@@ -269,7 +269,7 @@ Review notes: Tool descriptions are read by models. Keep them factual and avoid 
 
 Reports repositories that do not include `AGENTS.md`.
 
-Severity: high
+Severity: low
 
 Safer pattern: Add `AGENTS.md` with repository-specific build, test, review, and safety instructions for AI agents and human contributors.
 
@@ -277,7 +277,7 @@ Safer pattern: Add `AGENTS.md` with repository-specific build, test, review, and
 
 Reports repositories that do not include `SECURITY.md`.
 
-Severity: high
+Severity: low
 
 Safer pattern: Add `SECURITY.md` with supported versions and a vulnerability reporting channel.
 
@@ -285,10 +285,19 @@ Safer pattern: Add `SECURITY.md` with supported versions and a vulnerability rep
 
 Reports repositories that do not include `LICENSE`.
 
-Severity: high
+Severity: low
 
 Safer pattern: Add an OSI-approved license when the repository is intended to be open source.
 
 ## False positives
 
-This project favors early review signals over deep proof. If a finding is expected and reviewed, document the reason in code or in the repository security notes. Inline suppressions are planned but not yet implemented.
+This project favors early review signals over deep proof. If a finding is expected and reviewed, document the reason in code or in the repository security notes.
+
+Use a rule-specific suppression on the same line or previous line when a maintainer accepts a finding:
+
+```python
+# mcp-riskmap: ignore PY-SHELL-TRUE
+subprocess.run(command, shell=True)
+```
+
+Use `--exclude` for generated output, test fixtures, or intentionally unsafe examples that should not be part of a repository-level CI scan.

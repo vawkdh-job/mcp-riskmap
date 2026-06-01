@@ -31,6 +31,8 @@ Every new rule should include:
 
 Prefer conservative findings over noisy guesses.
 
+If a test fixture intentionally contains unsafe code, either place it under an excluded fixture path in CI or add a narrow `mcp-riskmap: ignore RULE-ID` suppression with a clear reason nearby.
+
 ## Pull requests
 
 Keep pull requests focused. Include a short explanation of the risk being detected and why static analysis is enough for the first version.

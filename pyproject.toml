@@ -12,7 +12,7 @@ license = { file = "LICENSE" }
 authors = [
   { name = "mcp-riskmap contributors" }
 ]
-keywords = ["mcp", "security", "agent", "static-analysis", "sarif"]
+keywords = ["mcp", "security", "agent", "static-analysis", "sarif", "github-actions", "code-scanning"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

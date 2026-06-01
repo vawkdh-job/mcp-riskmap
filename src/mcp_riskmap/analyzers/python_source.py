@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from mcp_riskmap.analyzers.common import relative_path, read_text
+from mcp_riskmap.analyzers.common import is_suppressed, relative_path, read_text
 from mcp_riskmap.models import Finding
 
 SHELL_TRUE_RE = re.compile(r"subprocess\.(run|call|Popen|check_call|check_output)\s*\([^)]*shell\s*=\s*True")
@@ -13,12 +13,14 @@ EVAL_EXEC_RE = re.compile(r"\b(eval|exec)\s*\(")
 def analyze_python(root: Path, path: Path) -> list[Finding]:
     findings: list[Finding] = []
     rel = relative_path(root, path)
-    for line_number, line in enumerate(read_text(path).splitlines(), start=1):
+    lines = read_text(path).splitlines()
+    for line_index, line in enumerate(lines):
+        line_number = line_index + 1
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
 
-        if SHELL_TRUE_RE.search(stripped):
+        if SHELL_TRUE_RE.search(stripped) and not is_suppressed(lines, line_index, "PY-SHELL-TRUE"):
             findings.append(
                 Finding(
                     rule_id="PY-SHELL-TRUE",
@@ -32,7 +34,8 @@ def analyze_python(root: Path, path: Path) -> list[Finding]:
                 )
             )
 
-        if "os.system(" in stripped:
+        # mcp-riskmap: ignore PY-OS-SYSTEM
+        if "os.system(" in stripped and not is_suppressed(lines, line_index, "PY-OS-SYSTEM"):
             findings.append(
                 Finding(
                     rule_id="PY-OS-SYSTEM",
@@ -46,7 +49,7 @@ def analyze_python(root: Path, path: Path) -> list[Finding]:
                 )
             )
 
-        if EVAL_EXEC_RE.search(stripped):
+        if EVAL_EXEC_RE.search(stripped) and not is_suppressed(lines, line_index, "PY-EVAL-EXEC"):
             findings.append(
                 Finding(
                     rule_id="PY-EVAL-EXEC",
@@ -60,7 +63,8 @@ def analyze_python(root: Path, path: Path) -> list[Finding]:
                 )
             )
 
-        if "ignore previous" in stripped.lower() or "system prompt" in stripped.lower():
+        # mcp-riskmap: ignore TOOL-DESCRIPTION-INJECTION
+        if ("ignore previous" in stripped.lower() or "system prompt" in stripped.lower()) and not is_suppressed(lines, line_index, "TOOL-DESCRIPTION-INJECTION"):
             findings.append(
                 Finding(
                     rule_id="TOOL-DESCRIPTION-INJECTION",

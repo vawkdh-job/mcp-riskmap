@@ -1,6 +1,7 @@
 # mcp-riskmap
 
 [![CI](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/ci.yml)
+[![mcp-riskmap](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/mcp-riskmap.yml/badge.svg?branch=main)](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/mcp-riskmap.yml)
 [![Release](https://img.shields.io/github/v/release/vawkdh-job/mcp-riskmap)](https://github.com/vawkdh-job/mcp-riskmap/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -30,6 +31,12 @@ From a checkout:
 python -m pip install -e .
 ```
 
+From GitHub:
+
+```bash
+python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.1.1"
+```
+
 For development without installing:
 
 ```bash
@@ -45,9 +52,12 @@ mcp-riskmap scan .
 mcp-riskmap scan . --format json
 mcp-riskmap scan . --format markdown --output report.md
 mcp-riskmap scan . --format sarif --output results.sarif --fail-on high
+mcp-riskmap scan . --exclude "examples/**" --exclude "tests/**"
 ```
 
 `--fail-on high` returns exit code `1` when at least one finding is high or critical.
+
+Use `--exclude` for reviewed fixture directories, generated output, or intentionally unsafe examples that should not block CI.
 
 ## Example output
 
@@ -67,6 +77,52 @@ HIGH      JS-CHILD-PROCESS-EXEC      server.js:4   A JavaScript tool handler can
 - `sarif`: GitHub Code Scanning compatible output
 
 Structured outputs redact secret-like evidence values before writing JSON or SARIF.
+
+## Reviewed suppressions
+
+If a maintainer reviews a finding and accepts the risk, add a narrow suppression on the same line or the previous line:
+
+```python
+# mcp-riskmap: ignore PY-SHELL-TRUE
+subprocess.run(command, shell=True)
+```
+
+Use rule-specific suppressions where possible. `mcp-riskmap: ignore` suppresses all rules on the next line and should be reserved for generated or documented fixture code.
+
+## GitHub Action
+
+This repository includes a composite GitHub Action:
+
+```yaml
+name: mcp-riskmap
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vawkdh-job/mcp-riskmap@v0.1.1
+        with:
+          path: .
+          format: sarif
+          output: mcp-riskmap.sarif
+          fail-on: high
+          exclude: |
+            examples/**
+            tests/**
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: mcp-riskmap.sarif
+```
 
 ## Safety stance
 
@@ -98,11 +154,9 @@ Some MCP scanners inspect live tool descriptions by starting configured servers.
 ## Roadmap
 
 - Add more MCP client config locations.
-- Add rule suppression with inline comments.
 - Detect unsafe filesystem writes and path traversal candidates.
 - Add rule severity profiles.
 - Add Semgrep-compatible pattern export.
-- Add GitHub Action packaging after the first tagged release.
 
 See [ROADMAP.md](ROADMAP.md) for issue-sized milestones.
 
@@ -111,3 +165,5 @@ See [ROADMAP.md](ROADMAP.md) for issue-sized milestones.
 This project is intended to be maintained as an open-source security and maintainer automation tool. It includes tests, CI, SARIF output, examples, security docs, contribution guidance, AGENTS.md, and tagged releases.
 
 Codex/API credits would be useful for reviewing rule changes, generating regression tests, triaging issues, improving documentation, and producing release notes. AI output should be reviewed by maintainers before merge.
+
+See [docs/codex-for-oss.md](docs/codex-for-oss.md) for application-specific maintainer workflow notes.

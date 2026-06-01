@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+from fnmatch import fnmatch
 from pathlib import Path
 
+from mcp_riskmap.analyzers.common import relative_path
 from mcp_riskmap.analyzers.config import analyze_config, is_candidate as is_config_candidate
 from mcp_riskmap.analyzers.js_source import analyze_javascript
 from mcp_riskmap.analyzers.python_source import analyze_python
@@ -16,7 +19,7 @@ class ScanInputError(ValueError):
     pass
 
 
-def scan_path(path: str | Path) -> ScanResult:
+def scan_path(path: str | Path, exclude_patterns: Sequence[str] | None = None) -> ScanResult:
     root = Path(path).resolve()
     if not root.exists():
         raise ScanInputError(f"scan target does not exist: {root}")
@@ -24,8 +27,9 @@ def scan_path(path: str | Path) -> ScanResult:
         raise ScanInputError(f"scan target is not a file or directory: {root}")
 
     findings: list[Finding] = []
+    excludes = tuple(_normalize_pattern(pattern) for pattern in (exclude_patterns or ()) if pattern)
 
-    for file_path in _iter_files(root):
+    for file_path in _iter_files(root, excludes):
         suffix = file_path.suffix.lower()
         if is_config_candidate(file_path):
             findings.extend(analyze_config(root, file_path))
@@ -39,9 +43,10 @@ def scan_path(path: str | Path) -> ScanResult:
     return ScanResult(root=root, findings=findings)
 
 
-def _iter_files(root: Path):
+def _iter_files(root: Path, exclude_patterns: Sequence[str]):
     if root.is_file():
-        yield root
+        if not _is_excluded(root, root, exclude_patterns):
+            yield root
         return
 
     for candidate in root.rglob("*"):
@@ -49,4 +54,20 @@ def _iter_files(root: Path):
             continue
         if any(part in SKIP_DIRS for part in candidate.parts):
             continue
+        if _is_excluded(root, candidate, exclude_patterns):
+            continue
         yield candidate
+
+
+def _is_excluded(root: Path, candidate: Path, exclude_patterns: Sequence[str]) -> bool:
+    if not exclude_patterns:
+        return False
+    rel = relative_path(root, candidate)
+    return any(fnmatch(rel, pattern) or fnmatch(candidate.name, pattern) for pattern in exclude_patterns)
+
+
+def _normalize_pattern(pattern: str) -> str:
+    normalized = pattern.replace("\\", "/").strip()
+    if normalized.endswith("/"):
+        return f"{normalized}**"
+    return normalized

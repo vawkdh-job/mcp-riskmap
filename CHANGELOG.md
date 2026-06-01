@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- Inline `mcp-riskmap: ignore RULE-ID` suppressions for reviewed findings.
+- `--exclude` support for fixture directories, generated output, and intentionally unsafe examples.
+- Composite GitHub Action wrapper plus repository self-scan workflow with SARIF upload.
+- Codex for OSS application notes documenting maintainer workflow fit and API credit use.
+
+### Fixed
+
+- Repository hygiene rule docs now match the implemented low severity.
+
 ## v0.1.1 - 2026-06-01
 
 ### Added

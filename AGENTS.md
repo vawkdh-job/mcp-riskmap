@@ -14,12 +14,14 @@ Run the CLI locally:
 ```bash
 $env:PYTHONPATH = "src"
 python -m mcp_riskmap.cli scan examples/unsafe-mcp-server --format table
+python -m mcp_riskmap.cli scan . --exclude "examples/**" --exclude "tests/**" --format table --fail-on high
 ```
 
 ## Review rules
 
 - Do not add runtime execution of scanned MCP servers.
 - Keep findings conservative and actionable.
+- Use narrow `mcp-riskmap: ignore RULE-ID` suppressions only after a finding is reviewed.
 - Every rule needs remediation text.
 - Every behavior change needs a test.
 - Prefer standard-library code unless a dependency removes meaningful risk or complexity.
