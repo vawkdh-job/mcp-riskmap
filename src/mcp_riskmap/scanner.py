@@ -12,8 +12,17 @@ SKIP_DIRS = {".git", ".hg", ".svn", "__pycache__", ".venv", "venv", "node_module
 JS_SUFFIXES = {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"}
 
 
+class ScanInputError(ValueError):
+    pass
+
+
 def scan_path(path: str | Path) -> ScanResult:
     root = Path(path).resolve()
+    if not root.exists():
+        raise ScanInputError(f"scan target does not exist: {root}")
+    if not root.is_file() and not root.is_dir():
+        raise ScanInputError(f"scan target is not a file or directory: {root}")
+
     findings: list[Finding] = []
 
     for file_path in _iter_files(root):
