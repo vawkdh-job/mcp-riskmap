@@ -10,7 +10,7 @@ from mcp_riskmap.reporters.json_reporter import render_json
 from mcp_riskmap.reporters.markdown import render_markdown
 from mcp_riskmap.reporters.sarif import render_sarif
 from mcp_riskmap.reporters.table import render_table
-from mcp_riskmap.scanner import scan_path
+from mcp_riskmap.scanner import ScanInputError, scan_path
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -50,7 +50,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _scan(args: argparse.Namespace) -> int:
-    result = scan_path(args.path)
+    try:
+        result = scan_path(args.path)
+    except ScanInputError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
     rendered = render_result(result, args.format)
     if args.output:
         Path(args.output).write_text(rendered + "\n", encoding="utf-8")
