@@ -25,7 +25,9 @@ class ReporterTests(unittest.TestCase):
         data = json.loads(render_sarif(result))
 
         self.assertEqual("2.1.0", data["version"])
-        self.assertEqual("mcp-riskmap", data["runs"][0]["tool"]["driver"]["name"])
+        driver = data["runs"][0]["tool"]["driver"]
+        self.assertEqual("mcp-riskmap", driver["name"])
+        self.assertEqual("https://github.com/vawkdh-job/mcp-riskmap", driver["informationUri"])
         self.assertEqual("PY-SHELL-TRUE", data["runs"][0]["results"][0]["ruleId"])
         self.assertEqual("server.py", data["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"])
 
