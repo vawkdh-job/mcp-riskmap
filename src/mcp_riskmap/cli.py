@@ -14,12 +14,11 @@ from mcp_riskmap.scanner import ScanInputError, scan_path
 
 
 def main(argv: list[str] | None = None) -> int:
-    if argv == ["--version"]:
-        print(f"mcp-riskmap {__version__}")
-        return 0
-
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.version:
+        print(f"mcp-riskmap {__version__}")
+        return 0
     if args.command == "scan":
         return _scan(args)
     parser.print_help()
@@ -31,6 +30,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="mcp-riskmap",
         description="Static MCP and agent-tool repository risk scanner.",
     )
+    parser.add_argument("--version", action="store_true", help="Print the package version and exit.")
     subparsers = parser.add_subparsers(dest="command")
     scan = subparsers.add_parser("scan", help="Scan a repository or directory.")
     scan.add_argument("path", nargs="?", default=".", help="Path to scan.")
