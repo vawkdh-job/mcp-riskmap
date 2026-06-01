@@ -7,13 +7,13 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add inline suppression comments for reviewed findings.
 - Add unsafe filesystem write and path traversal candidate rules.
 - Add support for more MCP client config locations.
-- Add safe and unsafe examples for every rule family.
+- Add CI examples for consuming `mcp-riskmap` from other repositories.
 
 ## v0.3.0
 
 - Add severity profiles for local development, CI, and release blocking.
-- Add SARIF rule help links that point to `docs/rules.md` anchors.
 - Add a packaged GitHub Action wrapper.
+- Add SARIF baseline guidance for maintainers who want to ratchet down existing findings.
 
 ## Later
 
