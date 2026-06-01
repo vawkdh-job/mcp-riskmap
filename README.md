@@ -66,6 +66,8 @@ HIGH      JS-CHILD-PROCESS-EXEC      server.js:4   A JavaScript tool handler can
 - `markdown`: issue and release-note friendly report
 - `sarif`: GitHub Code Scanning compatible output
 
+Structured outputs redact secret-like evidence values before writing JSON or SARIF.
+
 ## Safety stance
 
 `mcp-riskmap` does not execute MCP servers. It reads files and reports static findings. That means it will miss runtime-only behavior, but it is safer for quick review of unknown configs and pull requests.
