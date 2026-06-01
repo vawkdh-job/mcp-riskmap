@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from mcp_riskmap import __version__
 from mcp_riskmap.models import SEVERITY_ORDER, ScanResult
 from mcp_riskmap.reporters.json_reporter import render_json
 from mcp_riskmap.reporters.markdown import render_markdown
@@ -13,6 +14,10 @@ from mcp_riskmap.scanner import scan_path
 
 
 def main(argv: list[str] | None = None) -> int:
+    if argv == ["--version"]:
+        print(f"mcp-riskmap {__version__}")
+        return 0
+
     parser = _build_parser()
     args = parser.parse_args(argv)
     if args.command == "scan":
