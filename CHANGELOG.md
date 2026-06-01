@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- SARIF rule help links, rule metadata, and partial fingerprints for GitHub Code Scanning.
+- Rule documentation with unsafe examples, safer patterns, and review notes for each rule.
+- CI matrix for Python 3.10, 3.11, and 3.12 plus package build validation.
+
+### Changed
+
+- JSON and SARIF evidence now redact secret-like values before writing reports.
+- Missing or invalid scan targets now return a CLI input error instead of scanning the current working directory.
+
 ## v0.1.0 - 2026-06-01
 
 Initial public MVP release.
