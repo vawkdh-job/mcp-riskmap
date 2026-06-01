@@ -167,3 +167,7 @@ This project is intended to be maintained as an open-source security and maintai
 Codex/API credits would be useful for reviewing rule changes, generating regression tests, triaging issues, improving documentation, and producing release notes. AI output should be reviewed by maintainers before merge.
 
 See [docs/codex-for-oss.md](docs/codex-for-oss.md) for application-specific maintainer workflow notes.
+
+### Configuration Examples
+Examples of safe and unsafe code for the MCP server can be found in the [examples](./examples/) folder.
+
