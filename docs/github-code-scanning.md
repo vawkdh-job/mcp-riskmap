@@ -20,7 +20,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: vawkdh-job/mcp-riskmap@v0.1.2
+      - uses: vawkdh-job/mcp-riskmap@v0.1.3
         with:
           path: .
           format: sarif
