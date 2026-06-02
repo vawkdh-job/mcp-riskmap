@@ -3,6 +3,7 @@
 [![CI](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/ci.yml)
 [![mcp-riskmap](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/mcp-riskmap.yml/badge.svg?branch=main)](https://github.com/vawkdh-job/mcp-riskmap/actions/workflows/mcp-riskmap.yml)
 [![Release](https://img.shields.io/github/v/release/vawkdh-job/mcp-riskmap)](https://github.com/vawkdh-job/mcp-riskmap/releases)
+[![PyPI](https://img.shields.io/pypi/v/mcp-riskmap)](https://pypi.org/project/mcp-riskmap/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 `mcp-riskmap` is a local-first static auditor for MCP and agent-tool repositories. It looks for risky MCP configuration, shell-enabled tool handlers, prompt-injection-like tool descriptions, and missing maintainer guidance without starting untrusted MCP servers.
@@ -18,12 +19,20 @@ MCP servers often expose tools that can touch files, shells, networks, credentia
 - MCP config that starts through `cmd`, `powershell`, `bash`, or `sh`
 - Remote install pipelines such as `curl ... | sh` or `curl ... | iex`
 - Secret-like environment variables passed into MCP servers
+- Full process environment passthrough into Python or JavaScript child processes
 - Python `subprocess(..., shell=True)`, `os.system`, `eval`, and `exec`
 - JavaScript `child_process.exec` and `spawn(..., { shell: true })`
+- Python and JavaScript filesystem access that appears to use user-controlled path input
 - Tool text that looks like model-control prompt injection
 - Missing `AGENTS.md`, `SECURITY.md`, or `LICENSE`
 
 ## Install
+
+From PyPI:
+
+```bash
+python -m pip install --upgrade mcp-riskmap
+```
 
 From a checkout:
 
@@ -63,6 +72,7 @@ Use `--exclude` for reviewed fixture directories, generated output, or intention
 
 - `examples/unsafe-mcp-server/` contains intentionally risky MCP config and tool-handler patterns for scanner demonstrations.
 - `examples/safe-mcp-server/` contains a safer file-read pattern using a resolved base directory boundary check.
+- `docs/rules.md` contains unsafe examples, safer patterns, and review notes for each rule.
 
 ## Example output
 
@@ -158,8 +168,7 @@ Some MCP scanners inspect live tool descriptions by starting configured servers.
 
 ## Roadmap
 
-- Add more MCP client config locations.
-- Detect unsafe filesystem writes and path traversal candidates.
+- Add CI examples for consuming `mcp-riskmap` from other repositories.
 - Add rule severity profiles.
 - Add Semgrep-compatible pattern export.
 
@@ -167,7 +176,7 @@ See [ROADMAP.md](ROADMAP.md) for issue-sized milestones.
 
 ## OpenAI Codex for OSS fit
 
-This project is intended to be maintained as an open-source security and maintainer automation tool. It includes tests, CI, SARIF output, examples, security docs, contribution guidance, AGENTS.md, and tagged releases.
+This project is intended to be maintained as an open-source security and maintainer automation tool. It includes tests, CI, SARIF output, GitHub Code Scanning support, a published PyPI package, examples, security docs, contribution guidance, AGENTS.md, protected-main workflow notes, and tagged releases.
 
 Codex/API credits would be useful for reviewing rule changes, generating regression tests, triaging issues, improving documentation, and producing release notes. AI output should be reviewed by maintainers before merge.
 

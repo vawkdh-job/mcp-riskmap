@@ -201,6 +201,50 @@ return json.loads(tool_input)
 
 Review notes: Avoid evaluating model-controlled or user-controlled text. Use a parser for the expected data format.
 
+## PY-FILE-PATH-INPUT
+
+Reports Python filesystem operations that appear to use user-controlled path input, such as `request`, `params`, `input`, `filename`, or `file_path`.
+
+Severity: medium
+
+Unsafe example:
+
+```python
+return open(request.params["filename"]).read()
+```
+
+Safer pattern:
+
+```python
+base_dir = Path("/srv/data").resolve()
+requested = (base_dir / filename).resolve()
+if not requested.is_relative_to(base_dir):
+    raise ValueError("path escapes the allowed directory")
+return requested.read_text(encoding="utf-8")
+```
+
+Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files.
+
+## PY-ENV-PASSTHROUGH
+
+Reports Python child-process calls that pass the full process environment, such as `env=os.environ`.
+
+Severity: medium
+
+Unsafe example:
+
+```python
+subprocess.run(["git", "status"], env=os.environ)
+```
+
+Safer pattern:
+
+```python
+subprocess.run(["git", "status"], env={"PATH": os.environ.get("PATH", "")})
+```
+
+Review notes: Full environment passthrough can expose local credentials to child processes. Pass only the variables the child process needs.
+
 ## JS-CHILD-PROCESS-EXEC
 
 Reports JavaScript or TypeScript `child_process.exec` usage.
@@ -240,6 +284,51 @@ spawn("npm", ["run", "lint"], { shell: false });
 ```
 
 Review notes: `shell: true` changes command parsing semantics. Keep it disabled unless a maintainer has reviewed the full command surface.
+
+## JS-FILE-PATH-INPUT
+
+Reports JavaScript or TypeScript filesystem operations that appear to use user-controlled path input, such as `req`, `request`, `params`, `query`, `input`, or `filePath`.
+
+Severity: medium
+
+Unsafe example:
+
+```javascript
+return fs.readFileSync(path.join(baseDir, req.query.file), "utf8");
+```
+
+Safer pattern:
+
+```javascript
+const baseDir = path.resolve("/srv/data");
+const requested = path.resolve(baseDir, fileName);
+if (!requested.startsWith(baseDir + path.sep)) {
+  throw new Error("path escapes the allowed directory");
+}
+return fs.readFileSync(requested, "utf8");
+```
+
+Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files.
+
+## JS-ENV-PASSTHROUGH
+
+Reports JavaScript or TypeScript child-process calls that pass the full process environment, such as `env: process.env` or `...process.env`.
+
+Severity: medium
+
+Unsafe example:
+
+```javascript
+spawn("git", ["status"], { env: process.env });
+```
+
+Safer pattern:
+
+```javascript
+spawn("git", ["status"], { env: { PATH: process.env.PATH ?? "" } });
+```
+
+Review notes: Full environment passthrough can expose local credentials to child processes. Pass only the variables the child process needs.
 
 ## TOOL-DESCRIPTION-INJECTION
 

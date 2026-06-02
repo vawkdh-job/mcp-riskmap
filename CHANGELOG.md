@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- Python and JavaScript rules for filesystem operations that appear to use user-controlled path input.
+- Python and JavaScript rules for full process environment passthrough into child processes.
+- Additional MCP config filename support for `claude.json` and `mcp_config.json`.
+- PyPI-first install guidance and updated maintainer release checklist notes.
+
 ## v0.1.2 - 2026-06-01
 
 ### Added

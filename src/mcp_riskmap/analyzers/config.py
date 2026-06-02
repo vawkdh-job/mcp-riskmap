@@ -9,8 +9,10 @@ from mcp_riskmap.analyzers.common import relative_path, read_text
 from mcp_riskmap.models import Finding
 
 CONFIG_NAMES = {
+    "claude.json",
     "mcp.json",
     "mcp.config.json",
+    "mcp_config.json",
     "claude_desktop_config.json",
     "settings.json",
 }

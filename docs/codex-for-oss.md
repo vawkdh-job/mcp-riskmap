@@ -28,7 +28,10 @@ The intended workflow is:
 - Table, JSON, Markdown, and SARIF reports.
 - Secret-like evidence redaction for structured reports.
 - GitHub Action wrapper in `action.yml`.
+- Published PyPI package: https://pypi.org/project/mcp-riskmap/.
+- PyPI trusted publishing workflow using GitHub OIDC and the `pypi` environment.
 - CI matrix for Python 3.10, 3.11, and 3.12 plus package build validation.
+- Protected `main` branch with required scan, package, and Python-version test checks.
 - Security policy, contribution guide, AGENTS.md, issue templates, changelog, roadmap, and tagged releases.
 - Demo review artifact for an intentionally unsafe MCP fixture: [demo-unsafe-report.md](demo-unsafe-report.md).
 

@@ -8,6 +8,17 @@ from mcp_riskmap.models import Finding
 
 SHELL_TRUE_RE = re.compile(r"subprocess\.(run|call|Popen|check_call|check_output)\s*\([^)]*shell\s*=\s*True")
 EVAL_EXEC_RE = re.compile(r"\b(eval|exec)\s*\(")
+FILESYSTEM_OP_RE = re.compile(
+    r"\b(open|Path)\s*\("
+    r"|\.(read_text|write_text|read_bytes|write_bytes|unlink|rmdir)\s*\("
+    r"|\b(shutil\.(copy|copyfile|copytree|move|rmtree)|os\.(remove|unlink|rmdir|rename|replace))\s*\("
+)
+USER_PATH_RE = re.compile(
+    r"\b(request|params|arguments|tool_input|user_input|input|filename|file_name|filepath|file_path|upload|download|target_path|source_path)\b",
+    re.IGNORECASE,
+)
+PATH_TRAVERSAL_LITERAL_RE = re.compile(r"[\"'][^\"']*\.\.[^\"']*[\"']")
+ENV_PASSTHROUGH_RE = re.compile(r"\benv\s*=\s*(os\.environ(?:\.copy\(\))?|\{\s*\*\*\s*os\.environ)")
 
 
 def analyze_python(root: Path, path: Path) -> list[Finding]:
@@ -63,6 +74,34 @@ def analyze_python(root: Path, path: Path) -> list[Finding]:
                 )
             )
 
+        if _looks_like_user_controlled_filesystem_path(stripped) and not is_suppressed(lines, line_index, "PY-FILE-PATH-INPUT"):
+            findings.append(
+                Finding(
+                    rule_id="PY-FILE-PATH-INPUT",
+                    title="Python tool uses user-controlled filesystem path input",
+                    severity="medium",
+                    message="A Python tool appears to use user-controlled path input in a filesystem operation.",
+                    path=rel,
+                    line=line_number,
+                    remediation="Resolve paths against an allowlisted base directory and reject paths that escape it before reading, writing, moving, or deleting files.",
+                    evidence=stripped[:240],
+                )
+            )
+
+        if ENV_PASSTHROUGH_RE.search(stripped) and not is_suppressed(lines, line_index, "PY-ENV-PASSTHROUGH"):
+            findings.append(
+                Finding(
+                    rule_id="PY-ENV-PASSTHROUGH",
+                    title="Python tool passes the full process environment",
+                    severity="medium",
+                    message="A Python tool appears to pass the full process environment into a child process.",
+                    path=rel,
+                    line=line_number,
+                    remediation="Pass a minimal environment dictionary containing only the variables the child process requires.",
+                    evidence=stripped[:240],
+                )
+            )
+
         # mcp-riskmap: ignore TOOL-DESCRIPTION-INJECTION
         if ("ignore previous" in stripped.lower() or "system prompt" in stripped.lower()) and not is_suppressed(lines, line_index, "TOOL-DESCRIPTION-INJECTION"):
             findings.append(
@@ -79,3 +118,9 @@ def analyze_python(root: Path, path: Path) -> list[Finding]:
             )
 
     return findings
+
+
+def _looks_like_user_controlled_filesystem_path(line: str) -> bool:
+    if not FILESYSTEM_OP_RE.search(line):
+        return False
+    return bool(USER_PATH_RE.search(line) or PATH_TRAVERSAL_LITERAL_RE.search(line))
