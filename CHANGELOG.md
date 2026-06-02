@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.3 - 2026-06-03
+
 ### Added
 
 - Python and JavaScript rules for filesystem operations that appear to use user-controlled path input.
