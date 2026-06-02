@@ -70,6 +70,101 @@ class ScannerTests(unittest.TestCase):
         self.assertIn("PY-EVAL-EXEC", rule_ids)
         self.assertIn("JS-CHILD-PROCESS-EXEC", rule_ids)
 
+    def test_scan_path_detects_user_controlled_filesystem_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text(
+                textwrap.dedent(
+                    """
+                    def read_tool(request):
+                        return open(request.params["filename"]).read()
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+            (root / "server.js").write_text(
+                textwrap.dedent(
+                    """
+                    const fs = require("fs");
+                    const path = require("path");
+
+                    function readTool(req) {
+                      return fs.readFileSync(path.join(baseDir, req.query.file), "utf8");
+                    }
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        rule_ids = {finding.rule_id for finding in result.findings}
+        self.assertIn("PY-FILE-PATH-INPUT", rule_ids)
+        self.assertIn("JS-FILE-PATH-INPUT", rule_ids)
+
+    def test_scan_path_does_not_flag_static_filesystem_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text("def read_static():\n    return open('README.md').read()\n", encoding="utf-8")
+            (root / "server.js").write_text(
+                'const fs = require("fs");\nfunction readStatic() { return fs.readFileSync("README.md", "utf8"); }\n',
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        rule_ids = {finding.rule_id for finding in result.findings}
+        self.assertNotIn("PY-FILE-PATH-INPUT", rule_ids)
+        self.assertNotIn("JS-FILE-PATH-INPUT", rule_ids)
+
+    def test_scan_path_detects_process_environment_passthrough(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text(
+                textwrap.dedent(
+                    """
+                    import os
+                    import subprocess
+
+                    def run_tool():
+                        return subprocess.run(["git", "status"], env=os.environ)
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+            (root / "server.js").write_text(
+                textwrap.dedent(
+                    """
+                    const { spawn } = require("child_process");
+
+                    function runTool() {
+                      return spawn("git", ["status"], { env: process.env });
+                    }
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        rule_ids = {finding.rule_id for finding in result.findings}
+        self.assertIn("PY-ENV-PASSTHROUGH", rule_ids)
+        self.assertIn("JS-ENV-PASSTHROUGH", rule_ids)
+
+    def test_scan_path_detects_additional_mcp_config_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / "claude.json"
+            config.write_text(
+                json.dumps({"mcpServers": {"unsafe": {"command": "bash", "args": ["-lc", "python server.py"]}}}),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        rule_ids = {finding.rule_id for finding in result.findings}
+        self.assertIn("MCP-CONFIG-SHELL", rule_ids)
+
     def test_scan_path_honors_inline_suppression_comments(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -84,6 +179,23 @@ class ScannerTests(unittest.TestCase):
 
                     def dangerous_eval(expr):
                         return eval(expr)
+
+                    def reviewed_file_read(filename):
+                        # mcp-riskmap: ignore PY-FILE-PATH-INPUT
+                        return open(filename).read()
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+            (root / "server.js").write_text(
+                textwrap.dedent(
+                    """
+                    const fs = require("fs");
+
+                    function reviewedFileRead(filename) {
+                      // mcp-riskmap: ignore JS-FILE-PATH-INPUT
+                      return fs.readFileSync(filename, "utf8");
+                    }
                     """
                 ).strip(),
                 encoding="utf-8",
@@ -93,7 +205,10 @@ class ScannerTests(unittest.TestCase):
 
         rule_ids = {finding.rule_id for finding in result.findings if finding.path == "server.py"}
         self.assertNotIn("PY-SHELL-TRUE", rule_ids)
+        self.assertNotIn("PY-FILE-PATH-INPUT", rule_ids)
         self.assertIn("PY-EVAL-EXEC", rule_ids)
+        js_rule_ids = {finding.rule_id for finding in result.findings if finding.path == "server.js"}
+        self.assertNotIn("JS-FILE-PATH-INPUT", js_rule_ids)
 
     def test_scan_path_excludes_matching_paths(self):
         with tempfile.TemporaryDirectory() as tmp:

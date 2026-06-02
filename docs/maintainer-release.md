@@ -1,17 +1,49 @@
 # Maintainer Release Checklist
 
-This checklist covers the account-level release tasks that cannot be completed from a pull request alone.
+This checklist covers recurring release tasks and the account-level settings that protect the release path.
 
-## PyPI trusted publishing
+## Current setup
 
-`mcp-riskmap` uses a GitHub Actions workflow for PyPI publishing. The workflow does not store a PyPI API token. Instead, PyPI should trust GitHub's OpenID Connect identity for this repository.
+`mcp-riskmap` is published through GitHub Actions and PyPI trusted publishing. The workflow does not store a PyPI API token. PyPI trusts GitHub's OpenID Connect identity for this repository.
 
-### One-time PyPI setup
+| Area | Current value |
+| --- | --- |
+| PyPI project | `mcp-riskmap` |
+| GitHub owner | `vawkdh-job` |
+| GitHub repository | `mcp-riskmap` |
+| Publish workflow | `.github/workflows/publish-pypi.yml` |
+| PyPI environment | `pypi` |
+| Package page | https://pypi.org/project/mcp-riskmap/ |
 
-1. Create or sign in to a PyPI account.
-2. Verify the account email address.
-3. Enable two-factor authentication on the PyPI account.
-4. In PyPI, add a pending trusted publisher with these values:
+The `main` branch is protected. Required checks should match the jobs that run on pull requests:
+
+- `scan`
+- `package`
+- `test py3.10`
+- `test py3.11`
+- `test py3.12`
+
+On the GitHub branch protection page, leave `Allow force pushes` and `Allow deletions` unchecked.
+
+## Future release flow
+
+1. Update the version in `pyproject.toml`.
+2. Update the version in `src/mcp_riskmap/__init__.py`.
+3. Add release notes under `CHANGELOG.md`.
+4. Open a pull request and wait for all required checks.
+5. Merge to `main`.
+6. Create a non-prerelease GitHub release for the same version tag.
+7. Confirm that the `publish-pypi` workflow completed successfully.
+8. Verify installation from a clean environment:
+
+```bash
+python -m pip install --upgrade mcp-riskmap
+mcp-riskmap --version
+```
+
+## PyPI trusted publisher recovery
+
+If the PyPI project or trusted publisher configuration is recreated, use these values:
 
 | Field | Value |
 | --- | --- |
@@ -21,47 +53,18 @@ This checklist covers the account-level release tasks that cannot be completed f
 | Workflow filename | `publish-pypi.yml` |
 | Environment name | `pypi` |
 
-5. In GitHub, create the repository environment `pypi` under Settings -> Environments.
-6. If desired, require manual approval on the `pypi` environment before publishing.
+In GitHub, keep the repository environment `pypi` under Settings -> Environments. Requiring manual approval on the environment is acceptable for release control.
 
-### First publish
+## Branch protection recovery
 
-After the trusted publisher is configured and this workflow is on `main`, run the workflow manually:
-
-1. Open Actions -> `publish-pypi`.
-2. Select `Run workflow` on `main`.
-3. Confirm that the package uploads to https://pypi.org/project/mcp-riskmap/.
-4. Verify installation:
-
-```bash
-python -m pip install --upgrade mcp-riskmap
-mcp-riskmap --version
-```
-
-### Future releases
-
-For future releases, update the version in `pyproject.toml` and `src/mcp_riskmap/__init__.py`, merge the release PR, and publish a GitHub release. The `publish-pypi` workflow runs when a non-prerelease GitHub release is published.
-
-## Branch protection
-
-Enable branch protection on `main` so maintainer workflow evidence is stronger and accidental direct pushes are blocked.
-
-Recommended settings:
+If branch protection is recreated, use these settings for `main`:
 
 - Require a pull request before merging.
 - Require status checks before merging.
 - Require branches to be up to date before merging.
-- Required checks:
-  - `ci`
-  - `mcp-riskmap`
-- Block force pushes.
-- Block deletions.
-
-GitHub UI path:
-
-1. Open Settings -> Branches.
-2. Add a branch protection rule for `main`.
-3. Enable the settings above.
+- Require the five checks listed in Current setup.
+- Do not allow force pushes.
+- Do not allow deletions.
 
 GitHub CLI/API option, after `gh auth login` with repository admin rights:
 
@@ -71,7 +74,7 @@ gh api --method PUT repos/vawkdh-job/mcp-riskmap/branches/main/protection \
   -f required_pull_request_reviews='{}' \
   -F enforce_admins=true \
   -f restrictions=null \
-  -f required_status_checks='{"strict":true,"contexts":["ci","mcp-riskmap"]}'
+  -f required_status_checks='{"strict":true,"contexts":["scan","package","test py3.10","test py3.11","test py3.12"]}'
 ```
 
 Then verify:

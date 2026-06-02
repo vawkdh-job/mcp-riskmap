@@ -8,12 +8,14 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add path excludes for fixture directories and intentionally unsafe examples.
 - Add a packaged GitHub Action wrapper.
 - Add a repository self-scan workflow that uploads SARIF.
+- Add unsafe filesystem path input candidate rules for Python and JavaScript.
+- Add full environment passthrough rules for Python and JavaScript child processes.
+- Add support for additional MCP client config names such as `claude.json` and `mcp_config.json`.
 
 ## v0.2.0
 
-- Add unsafe filesystem write and path traversal candidate rules.
-- Add support for more MCP client config locations.
 - Add CI examples for consuming `mcp-riskmap` from other repositories.
+- Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
 
 ## v0.3.0
 
