@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.4 - 2026-06-03
+
 ### Fixed
 
 - Register filesystem path-input and environment-passthrough rule metadata for SARIF/Code Scanning output.
