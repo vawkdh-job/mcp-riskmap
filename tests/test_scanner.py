@@ -151,6 +151,68 @@ class ScannerTests(unittest.TestCase):
         self.assertIn("PY-ENV-PASSTHROUGH", rule_ids)
         self.assertIn("JS-ENV-PASSTHROUGH", rule_ids)
 
+    def test_scan_path_detects_broad_mcp_config_environment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / "mcp.json"
+            config.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "broad-env": {
+                                "command": "python",
+                                "args": ["server.py"],
+                                "env": {
+                                    "PATH": "${env:PATH}",
+                                    "HOME": "${env:HOME}",
+                                    "USERPROFILE": "${env:USERPROFILE}",
+                                    "APPDATA": "${env:APPDATA}",
+                                },
+                            },
+                            "narrow-env": {
+                                "command": "python",
+                                "args": ["server.py"],
+                                "env": {"PROJECT_ROOT": "/workspace/project"},
+                            },
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        broad_findings = [finding for finding in result.findings if finding.rule_id == "MCP-CONFIG-BROAD-ENV"]
+        self.assertEqual(1, len(broad_findings))
+        self.assertIn("broad-env", broad_findings[0].message)
+        self.assertNotIn("narrow-env", broad_findings[0].message)
+
+    def test_scan_path_detects_entire_environment_reference_in_mcp_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = root / "mcp.json"
+            config.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "whole-env": {
+                                "command": "python",
+                                "args": ["server.py"],
+                                "env": {"ENV": "process.env"},
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        broad_findings = [finding for finding in result.findings if finding.rule_id == "MCP-CONFIG-BROAD-ENV"]
+        self.assertEqual(1, len(broad_findings))
+        self.assertIn("whole-env", broad_findings[0].message)
+        self.assertIn("ENV", broad_findings[0].evidence)
+
     def test_scan_path_detects_additional_mcp_config_names(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

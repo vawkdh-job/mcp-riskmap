@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.1.5 - 2026-06-03
+
+### Added
+
+- Detect MCP config `env` blocks that pass broad local environment context, including whole-environment references and bundled host-context keys.
+- Add broad environment examples and remediation notes to the unsafe fixture and rule documentation.
+
 ## v0.1.4 - 2026-06-03
 
 ### Fixed

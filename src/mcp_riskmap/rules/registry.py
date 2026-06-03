@@ -40,6 +40,7 @@ RULES = RuleCatalog(
         "MCP-CONFIG-SHELL": _rule("MCP-CONFIG-SHELL", "MCP config starts a server through a shell wrapper.", "high", "8.0", ("security", "mcp", "command-execution")),
         "MCP-CONFIG-REMOTE-INSTALL": _rule("MCP-CONFIG-REMOTE-INSTALL", "MCP config downloads and executes remote content.", "high", "9.0", ("security", "mcp", "supply-chain")),
         "MCP-CONFIG-SECRET-ENV": _rule("MCP-CONFIG-SECRET-ENV", "MCP config passes secret-like environment variables.", "medium", "6.5", ("security", "mcp", "secrets")),
+        "MCP-CONFIG-BROAD-ENV": _rule("MCP-CONFIG-BROAD-ENV", "MCP config passes broad local environment context.", "medium", "5.5", ("security", "mcp", "secrets")),
         "MCP-CONFIG-NPX-LATEST": _rule("MCP-CONFIG-NPX-LATEST", "MCP config runs npx -y without an explicit review gate.", "medium", "5.5", ("security", "mcp", "supply-chain")),
         "PY-SHELL-TRUE": _rule("PY-SHELL-TRUE", "Python source uses subprocess with shell=True.", "high", "8.0", ("security", "python", "command-execution")),
         "PY-OS-SYSTEM": _rule("PY-OS-SYSTEM", "Python source uses os.system.", "high", "8.0", ("security", "python", "command-execution")),

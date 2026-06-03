@@ -58,6 +58,7 @@ class ReporterTests(unittest.TestCase):
             "MCP-CONFIG-SHELL",
             "MCP-CONFIG-REMOTE-INSTALL",
             "MCP-CONFIG-SECRET-ENV",
+            "MCP-CONFIG-BROAD-ENV",
             "MCP-CONFIG-NPX-LATEST",
             "PY-SHELL-TRUE",
             "PY-OS-SYSTEM",

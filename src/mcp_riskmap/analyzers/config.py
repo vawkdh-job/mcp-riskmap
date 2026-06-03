@@ -18,6 +18,30 @@ CONFIG_NAMES = {
 }
 
 SECRET_KEY_RE = re.compile(r"(api[_-]?key|token|secret|password|credential)", re.IGNORECASE)
+BROAD_ENV_VALUE_RE = re.compile(
+    r"(process\.env|os\.environ|\$\{env(?::\*)?\}|\$env:\*|%env%|%environment%)",
+    re.IGNORECASE,
+)
+BROAD_ENV_ALIAS_KEYS = {"*", "ALL", "ENV", "ENVIRONMENT", "PROCESS_ENV", "PROCESS.ENV", "OS_ENVIRON", "OS.ENVIRON"}
+BROAD_CONTEXT_ENV_KEYS = {
+    "APPDATA",
+    "AWS_CONFIG_FILE",
+    "AWS_PROFILE",
+    "DOCKER_HOST",
+    "GIT_ASKPASS",
+    "GIT_SSH_COMMAND",
+    "HOME",
+    "KUBECONFIG",
+    "LOCALAPPDATA",
+    "NPM_CONFIG_USERCONFIG",
+    "PATH",
+    "PIP_CONFIG_FILE",
+    "SSH_AUTH_SOCK",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+}
+BROAD_CONTEXT_KEY_THRESHOLD = 3
 
 
 def is_candidate(path: Path) -> bool:
@@ -86,6 +110,20 @@ def analyze_config(root: Path, path: Path) -> list[Finding]:
                         evidence=", ".join(secret_keys),
                     )
                 )
+            broad_keys = _broad_environment_keys(env)
+            if broad_keys:
+                findings.append(
+                    Finding(
+                        rule_id="MCP-CONFIG-BROAD-ENV",
+                        title="MCP config passes broad environment context",
+                        severity="medium",
+                        message=f"MCP server '{server_name}' passes broad environment context: {', '.join(broad_keys)}.",
+                        path=path_text,
+                        line=_line_for(text, broad_keys[0]),
+                        remediation="Pass only the specific environment variables the server requires and document why each one is needed.",
+                        evidence=", ".join(broad_keys),
+                    )
+                )
 
         if command.lower() == "npx" and any(arg == "-y" for arg in args):
             findings.append(
@@ -117,6 +155,26 @@ def _looks_like_shell_wrapper(command: str, args: list[str]) -> bool:
         return True
     shell_flags = {"/c", "-c", "-command", "/command"}
     return any(arg.lower() in shell_flags for arg in args)
+
+
+def _broad_environment_keys(env: dict[Any, Any]) -> list[str]:
+    explicit_broad = sorted(
+        str(key)
+        for key, value in env.items()
+        if _is_broad_env_alias(key) or _refs_entire_environment(value)
+    )
+    context_keys = sorted(str(key) for key in env if str(key).upper() in BROAD_CONTEXT_ENV_KEYS)
+    if len(context_keys) >= BROAD_CONTEXT_KEY_THRESHOLD:
+        return sorted(set([*explicit_broad, *context_keys]))
+    return explicit_broad
+
+
+def _is_broad_env_alias(key: Any) -> bool:
+    return str(key).upper() in BROAD_ENV_ALIAS_KEYS
+
+
+def _refs_entire_environment(value: Any) -> bool:
+    return isinstance(value, str) and bool(BROAD_ENV_VALUE_RE.search(value))
 
 
 def _line_for(text: str, needle: str) -> int:
