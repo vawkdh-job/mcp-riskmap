@@ -7,6 +7,16 @@
         "OPENAI_API_KEY": "demo-secret"
       }
     },
+    "broad-env-demo": {
+      "command": "python",
+      "args": ["server.py"],
+      "env": {
+        "PATH": "${env:PATH}",
+        "HOME": "${env:HOME}",
+        "USERPROFILE": "${env:USERPROFILE}",
+        "APPDATA": "${env:APPDATA}"
+      }
+    },
     "npx-demo": {
       "command": "npx",
       "args": ["-y", "@example/unsafe-mcp@latest"]

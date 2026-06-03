@@ -107,6 +107,49 @@ Safer pattern:
 
 Review notes: Avoid committing secret values. If the server needs credentials, document required variable names and let the local environment provide values.
 
+## MCP-CONFIG-BROAD-ENV
+
+Reports MCP server configs that pass broad local environment context, such as an entire environment reference or several host-context variables.
+
+Severity: medium
+
+Unsafe example:
+
+```json
+{
+  "mcpServers": {
+    "demo": {
+      "command": "python",
+      "args": ["server.py"],
+      "env": {
+        "PATH": "${env:PATH}",
+        "HOME": "${env:HOME}",
+        "USERPROFILE": "${env:USERPROFILE}",
+        "APPDATA": "${env:APPDATA}"
+      }
+    }
+  }
+}
+```
+
+Safer pattern:
+
+```json
+{
+  "mcpServers": {
+    "demo": {
+      "command": "python",
+      "args": ["server.py"],
+      "env": {
+        "PROJECT_ROOT": "/workspace/project"
+      }
+    }
+  }
+}
+```
+
+Review notes: Broad host context can expose credential helpers, profile paths, package-manager config, or shell search paths to a tool process. Pass only the variables the server requires and document why each one is needed.
+
 ## MCP-CONFIG-NPX-LATEST
 
 Reports non-interactive `npx -y` usage because it may run packages without a review gate.
