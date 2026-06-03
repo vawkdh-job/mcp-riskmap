@@ -8,6 +8,7 @@ from mcp_riskmap.reporters.json_reporter import render_json
 from mcp_riskmap.reporters.markdown import render_markdown
 from mcp_riskmap.reporters.sarif import render_sarif
 from mcp_riskmap.reporters.table import render_table
+from mcp_riskmap.rules.registry import RULES
 
 
 class ReporterTests(unittest.TestCase):
@@ -51,6 +52,34 @@ class ReporterTests(unittest.TestCase):
 
         self.assertIn("PY-SHELL-TRUE", render_markdown(result))
         self.assertIn("server.py", render_table(result))
+
+    def test_current_rule_ids_have_registered_sarif_metadata(self):
+        current_rule_ids = {
+            "MCP-CONFIG-SHELL",
+            "MCP-CONFIG-REMOTE-INSTALL",
+            "MCP-CONFIG-SECRET-ENV",
+            "MCP-CONFIG-NPX-LATEST",
+            "PY-SHELL-TRUE",
+            "PY-OS-SYSTEM",
+            "PY-EVAL-EXEC",
+            "PY-FILE-PATH-INPUT",
+            "PY-ENV-PASSTHROUGH",
+            "JS-CHILD-PROCESS-EXEC",
+            "JS-SPAWN-SHELL",
+            "JS-FILE-PATH-INPUT",
+            "JS-ENV-PASSTHROUGH",
+            "TOOL-DESCRIPTION-INJECTION",
+            "REPO-MISSING-AGENTS",
+            "REPO-MISSING-SECURITY",
+            "REPO-MISSING-LICENSE",
+        }
+
+        for rule_id in current_rule_ids:
+            with self.subTest(rule_id=rule_id):
+                metadata = RULES.metadata_for(rule_id)
+                self.assertEqual(rule_id, metadata.rule_id)
+                self.assertNotEqual("Unregistered mcp-riskmap rule.", metadata.description)
+                self.assertTrue(metadata.help_uri.endswith(f"#{rule_id.lower()}"))
 
 
 # mcp-riskmap: ignore PY-SHELL-TRUE

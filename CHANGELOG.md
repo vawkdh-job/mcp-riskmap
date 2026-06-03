@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- Register filesystem path-input and environment-passthrough rule metadata for SARIF/Code Scanning output.
+- Refresh packaged action and Code Scanning examples to use Node 24-based GitHub Actions.
+- Mark the safe file-read example's reviewed path-input finding with a rule-specific suppression.
+
 ## v0.1.3 - 2026-06-03
 
 ### Added

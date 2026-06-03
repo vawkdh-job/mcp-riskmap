@@ -19,7 +19,7 @@ jobs:
       security-events: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: vawkdh-job/mcp-riskmap@v0.1.3
         with:
           path: .
