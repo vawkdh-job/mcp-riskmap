@@ -65,6 +65,7 @@ mcp-riskmap scan . --format sarif --output results.sarif --fail-on high
 mcp-riskmap scan . --exclude "examples/**" --exclude "tests/**"
 mcp-riskmap scan . --profile ci
 mcp-riskmap baseline . --output mcp-riskmap-baseline.json
+mcp-riskmap baseline-check . --baseline mcp-riskmap-baseline.json
 mcp-riskmap scan . --baseline mcp-riskmap-baseline.json --profile ci
 ```
 
@@ -82,6 +83,8 @@ Use `--profile` for common fail policies:
 `--fail-on` overrides the selected profile.
 
 Use `baseline` when adopting `mcp-riskmap` in a repository that already has reviewed findings. The baseline records current findings, and `scan --baseline` reports only findings that are not already in the baseline.
+
+Use `baseline-check` to audit baseline drift. It reports baseline entries that are still active, entries that are now stale because the finding disappeared, and current findings that are not in the baseline. It returns exit code `1` when new findings are present.
 
 See [docs/baseline-ratchet.md](docs/baseline-ratchet.md) for the recommended baseline workflow.
 

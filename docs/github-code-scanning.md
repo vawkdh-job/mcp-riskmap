@@ -48,9 +48,10 @@ For repositories that already have reviewed findings, create a baseline once and
 
 ```bash
 mcp-riskmap baseline . --output mcp-riskmap-baseline.json --exclude "examples/**" --exclude "tests/**"
+mcp-riskmap baseline-check . --baseline mcp-riskmap-baseline.json --exclude "examples/**" --exclude "tests/**"
 mcp-riskmap scan . --baseline mcp-riskmap-baseline.json --profile ci
 ```
 
-Commit the baseline only after the current findings have been reviewed. Remove baseline entries as the underlying risks are fixed.
+Commit the baseline only after the current findings have been reviewed. Remove baseline entries as the underlying risks are fixed. `baseline-check` reports active, stale, and new baseline state so CI logs show whether the baseline is shrinking.
 
 See [baseline-ratchet.md](baseline-ratchet.md) for the review workflow and [ci-examples](ci-examples/) for copy-paste workflow files.
