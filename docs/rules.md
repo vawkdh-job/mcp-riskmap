@@ -243,7 +243,7 @@ Review notes: `shell: true` changes command parsing semantics. Keep it disabled 
 
 ## TOOL-DESCRIPTION-INJECTION
 
-Reports tool text that contains phrases commonly used to override model instructions.
+Reports source text and JSON tool metadata that contain phrases commonly used to override model instructions.
 
 Severity: medium
 
@@ -263,7 +263,7 @@ Safer pattern:
 }
 ```
 
-Review notes: Tool descriptions are read by models. Keep them factual and avoid language that tries to override model, system, or developer instructions.
+Review notes: Tool descriptions, titles, prompts, and schema descriptions are read by models. Keep them factual and avoid language that tries to override model, system, or developer instructions.
 
 ## REPO-MISSING-AGENTS
 

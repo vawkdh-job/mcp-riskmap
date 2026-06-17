@@ -4,6 +4,15 @@
 
 ### Added
 
+- `--profile local|audit|ci|release` fail policies for common local, CI, and release workflows.
+- `mcp-riskmap baseline` plus `scan --baseline` for gradual adoption in repositories with reviewed existing findings.
+- Copy-paste GitHub Actions examples and baseline ratchet documentation.
+- JSON tool metadata prompt-injection detection for descriptors that define tool descriptions or schema text.
+
+## v0.1.2 - 2026-06-01
+
+### Added
+
 - Inline `mcp-riskmap: ignore RULE-ID` suppressions for reviewed findings.
 - `--exclude` support for fixture directories, generated output, and intentionally unsafe examples.
 - Composite GitHub Action wrapper plus repository self-scan workflow with SARIF upload.

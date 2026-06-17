@@ -5,7 +5,9 @@ import sys
 from pathlib import Path
 
 from mcp_riskmap import __version__
+from mcp_riskmap.baseline import BaselineError, filter_baselined_findings, load_baseline, render_baseline
 from mcp_riskmap.models import SEVERITY_ORDER, ScanResult
+from mcp_riskmap.profiles import PROFILE_FAIL_ON, fail_threshold
 from mcp_riskmap.reporters.json_reporter import render_json
 from mcp_riskmap.reporters.markdown import render_markdown
 from mcp_riskmap.reporters.sarif import render_sarif
@@ -21,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "scan":
         return _scan(args)
+    if args.command == "baseline":
+        return _baseline(args)
     parser.print_help()
     return 2
 
@@ -34,6 +38,12 @@ def _build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
     scan = subparsers.add_parser("scan", help="Scan a repository or directory.")
     scan.add_argument("path", nargs="?", default=".", help="Path to scan.")
+    scan.add_argument(
+        "--profile",
+        choices=list(PROFILE_FAIL_ON),
+        default="local",
+        help="Apply a default fail policy for local, audit, ci, or release use.",
+    )
     scan.add_argument(
         "--format",
         choices=["table", "json", "markdown", "sarif"],
@@ -50,7 +60,18 @@ def _build_parser() -> argparse.ArgumentParser:
     scan.add_argument(
         "--fail-on",
         choices=list(SEVERITY_ORDER),
-        help="Return exit code 1 when any finding is at or above this severity.",
+        help="Override the profile and return exit code 1 when any finding is at or above this severity.",
+    )
+    scan.add_argument("--baseline", help="Filter findings already recorded in a baseline JSON file.")
+
+    baseline = subparsers.add_parser("baseline", help="Create a baseline JSON file from current findings.")
+    baseline.add_argument("path", nargs="?", default=".", help="Path to scan when creating the baseline.")
+    baseline.add_argument("--output", required=True, help="Write the baseline JSON file.")
+    baseline.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Exclude a relative path glob from baseline scanning. Can be passed more than once.",
     )
     return parser
 
@@ -61,6 +82,12 @@ def _scan(args: argparse.Namespace) -> int:
     except ScanInputError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+    if args.baseline:
+        try:
+            result = filter_baselined_findings(result, load_baseline(args.baseline))
+        except BaselineError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
 
     rendered = render_result(result, args.format)
     if args.output:
@@ -68,8 +95,21 @@ def _scan(args: argparse.Namespace) -> int:
     else:
         print(rendered)
 
-    if args.fail_on and result.count_at_or_above(args.fail_on):
+    threshold = fail_threshold(args.profile, args.fail_on)
+    if threshold and result.count_at_or_above(threshold):
         return 1
+    return 0
+
+
+def _baseline(args: argparse.Namespace) -> int:
+    try:
+        result = scan_path(args.path, exclude_patterns=args.exclude)
+    except ScanInputError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    Path(args.output).write_text(render_baseline(result) + "\n", encoding="utf-8")
+    print(f"Wrote baseline with {len(result.findings)} findings: {args.output}")
     return 0
 
 

@@ -24,7 +24,7 @@ def is_candidate(path: Path) -> bool:
 
 def analyze_config(root: Path, path: Path) -> list[Finding]:
     text = read_text(path)
-    if "mcpServers" not in text and "mcp_servers" not in text:
+    if "mcpServers" not in text and "mcp_servers" not in text and "tools" not in text:
         return []
 
     findings: list[Finding] = []
@@ -33,12 +33,28 @@ def analyze_config(root: Path, path: Path) -> list[Finding]:
     except json.JSONDecodeError:
         return findings
 
+    path_text = relative_path(root, path)
+    for metadata_text in _tool_metadata_strings(data):
+        if _looks_like_prompt_injection(metadata_text):
+            findings.append(
+                Finding(
+                    rule_id="TOOL-DESCRIPTION-INJECTION",
+                    title="Tool metadata contains prompt-injection-like wording",
+                    severity="medium",
+                    message="Tool metadata includes phrases often used to override model instructions.",
+                    path=path_text,
+                    line=_line_for(text, metadata_text),
+                    remediation="Keep tool names, descriptions, and schemas factual; remove instructions that target the model control plane.",
+                    evidence=metadata_text[:240],
+                )
+            )
+            break
+
     servers = _server_entries(data)
     for server_name, server in servers:
         command = str(server.get("command", ""))
         args = [str(arg) for arg in server.get("args", [])]
         command_line = " ".join([command, *args]).lower()
-        path_text = relative_path(root, path)
 
         if _looks_like_shell_wrapper(command, args):
             findings.append(
@@ -115,6 +131,31 @@ def _looks_like_shell_wrapper(command: str, args: list[str]) -> bool:
         return True
     shell_flags = {"/c", "-c", "-command", "/command"}
     return any(arg.lower() in shell_flags for arg in args)
+
+
+def _tool_metadata_strings(value: Any) -> list[str]:
+    strings: list[str] = []
+    _collect_tool_metadata_strings(value, strings)
+    return strings
+
+
+def _collect_tool_metadata_strings(value: Any, strings: list[str]) -> None:
+    metadata_keys = {"description", "title", "instructions", "prompt", "systemPrompt"}
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(key, str) and key in metadata_keys and isinstance(item, str):
+                strings.append(item)
+            else:
+                _collect_tool_metadata_strings(item, strings)
+    elif isinstance(value, list):
+        for item in value:
+            _collect_tool_metadata_strings(item, strings)
+
+
+def _looks_like_prompt_injection(text: str) -> bool:
+    lowered = text.lower()
+    # mcp-riskmap: ignore TOOL-DESCRIPTION-INJECTION
+    return "ignore previous" in lowered or "system prompt" in lowered
 
 
 def _line_for(text: str, needle: str) -> int:
