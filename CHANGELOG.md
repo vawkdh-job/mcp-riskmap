@@ -6,6 +6,10 @@
 
 - `mcp-riskmap baseline-check` for baseline ratchet audits that report active, stale, and new findings.
 
+### Fixed
+
+- Reduce filesystem path-input false positives for Python `Path(...)` and JavaScript `path.join(...)` calls that only construct paths without reading, writing, moving, or deleting files.
+
 ## v0.2.0 - 2026-06-17
 
 ### Added

@@ -266,7 +266,7 @@ if not requested.is_relative_to(base_dir):
 return requested.read_text(encoding="utf-8")
 ```
 
-Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files.
+Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files. Path construction alone is not reported unless it is part of a filesystem access call.
 
 ## PY-ENV-PASSTHROUGH
 
@@ -351,7 +351,7 @@ if (!requested.startsWith(baseDir + path.sep)) {
 return fs.readFileSync(requested, "utf8");
 ```
 
-Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files.
+Review notes: User-controlled paths are sometimes intended MCP tool behavior. Require a resolved base-directory boundary check before reading, writing, moving, or deleting files. Path construction alone is not reported unless it is part of a filesystem access call.
 
 ## JS-ENV-PASSTHROUGH
 
