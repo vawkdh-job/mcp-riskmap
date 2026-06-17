@@ -15,10 +15,10 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add baseline creation and baseline-filtered scans for gradual adoption.
 - Add CI examples for consuming `mcp-riskmap` from other repositories.
 - Add baseline ratchet documentation for repositories with existing findings.
+- Add baseline ratchet audit output for active, stale, and new findings.
 
-## v0.2.0
+## v0.2.x
 
-- Add release notes and verification steps for the profile and baseline workflow.
 - Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
 
 ## v0.3.0

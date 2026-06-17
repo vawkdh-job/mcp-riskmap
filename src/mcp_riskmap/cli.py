@@ -5,7 +5,14 @@ import sys
 from pathlib import Path
 
 from mcp_riskmap import __version__
-from mcp_riskmap.baseline import BaselineError, filter_baselined_findings, load_baseline, render_baseline
+from mcp_riskmap.baseline import (
+    BaselineError,
+    audit_baseline,
+    filter_baselined_findings,
+    load_baseline,
+    render_baseline,
+    render_baseline_audit,
+)
 from mcp_riskmap.models import SEVERITY_ORDER, ScanResult
 from mcp_riskmap.profiles import PROFILE_FAIL_ON, fail_threshold
 from mcp_riskmap.reporters.json_reporter import render_json
@@ -25,6 +32,8 @@ def main(argv: list[str] | None = None) -> int:
         return _scan(args)
     if args.command == "baseline":
         return _baseline(args)
+    if args.command == "baseline-check":
+        return _baseline_check(args)
     parser.print_help()
     return 2
 
@@ -73,6 +82,26 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         help="Exclude a relative path glob from baseline scanning. Can be passed more than once.",
     )
+
+    baseline_check = subparsers.add_parser(
+        "baseline-check",
+        help="Compare current findings with a baseline and report active, stale, and new findings.",
+    )
+    baseline_check.add_argument("path", nargs="?", default=".", help="Path to scan when checking the baseline.")
+    baseline_check.add_argument("--baseline", required=True, help="Baseline JSON file to compare against.")
+    baseline_check.add_argument(
+        "--format",
+        choices=["table", "json"],
+        default="table",
+        help="Output format.",
+    )
+    baseline_check.add_argument("--output", help="Write report to a file instead of stdout.")
+    baseline_check.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Exclude a relative path glob from baseline checking. Can be passed more than once.",
+    )
     return parser
 
 
@@ -110,6 +139,28 @@ def _baseline(args: argparse.Namespace) -> int:
 
     Path(args.output).write_text(render_baseline(result) + "\n", encoding="utf-8")
     print(f"Wrote baseline with {len(result.findings)} findings: {args.output}")
+    return 0
+
+
+def _baseline_check(args: argparse.Namespace) -> int:
+    try:
+        result = scan_path(args.path, exclude_patterns=args.exclude)
+        audit = audit_baseline(result, load_baseline(args.baseline))
+    except ScanInputError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    except BaselineError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    rendered = render_baseline_audit(audit, args.format)
+    if args.output:
+        Path(args.output).write_text(rendered + "\n", encoding="utf-8")
+    else:
+        print(rendered)
+
+    if audit.new_findings:
+        return 1
     return 0
 
 

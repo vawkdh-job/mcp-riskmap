@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- `mcp-riskmap baseline-check` for baseline ratchet audits that report active, stale, and new findings.
+
 ## v0.2.0 - 2026-06-17
 
 ### Added

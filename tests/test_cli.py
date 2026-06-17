@@ -125,6 +125,65 @@ class CliTests(unittest.TestCase):
         self.assertNotIn("known.py", finding_paths)
         self.assertIn("new.py", finding_paths)
 
+    def test_baseline_check_reports_active_stale_and_new_findings(self):
+        stdout = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline_path = root / "mcp-riskmap-baseline.json"
+            for name in ("AGENTS.md", "SECURITY.md", "LICENSE"):
+                (root / name).write_text("present\n", encoding="utf-8")
+            unsafe_source = "import subprocess\nsubprocess.run(command, shell=True)\n"
+            (root / "known.py").write_text(unsafe_source, encoding="utf-8")
+            (root / "fixed.py").write_text(unsafe_source, encoding="utf-8")
+
+            with redirect_stdout(io.StringIO()):
+                baseline_code = main(["baseline", str(root), "--output", str(baseline_path)])
+
+            (root / "fixed.py").unlink()
+            (root / "new.py").write_text(unsafe_source, encoding="utf-8")
+
+            with redirect_stdout(stdout):
+                check_code = main(["baseline-check", str(root), "--baseline", str(baseline_path), "--format", "json"])
+
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(0, baseline_code)
+        self.assertEqual(1, check_code)
+        self.assertEqual(
+            {
+                "baseline": 2,
+                "current": 2,
+                "active": 1,
+                "stale": 1,
+                "new": 1,
+            },
+            data["summary"],
+        )
+        self.assertEqual(["new.py"], [finding["path"] for finding in data["new_findings"]])
+
+    def test_baseline_check_allows_stale_baseline_without_new_findings(self):
+        stdout = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline_path = root / "mcp-riskmap-baseline.json"
+            for name in ("AGENTS.md", "SECURITY.md", "LICENSE"):
+                (root / name).write_text("present\n", encoding="utf-8")
+            unsafe_source = "import subprocess\nsubprocess.run(command, shell=True)\n"
+            (root / "fixed.py").write_text(unsafe_source, encoding="utf-8")
+
+            with redirect_stdout(io.StringIO()):
+                baseline_code = main(["baseline", str(root), "--output", str(baseline_path)])
+
+            (root / "fixed.py").unlink()
+
+            with redirect_stdout(stdout):
+                check_code = main(["baseline-check", str(root), "--baseline", str(baseline_path), "--format", "json"])
+
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(0, baseline_code)
+        self.assertEqual(0, check_code)
+        self.assertEqual(1, data["summary"]["stale"])
+        self.assertEqual(0, data["summary"]["new"])
+
 
 if __name__ == "__main__":
     unittest.main()

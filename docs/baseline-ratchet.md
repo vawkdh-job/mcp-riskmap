@@ -22,6 +22,22 @@ mcp-riskmap scan . --baseline mcp-riskmap-baseline.json --profile ci
 
 The scan reports findings that are not present in the baseline. With `--profile ci`, high and critical findings return exit code `1`.
 
+## Audit baseline drift
+
+Check whether the baseline is shrinking or hiding newly introduced findings:
+
+```bash
+mcp-riskmap baseline-check . --baseline mcp-riskmap-baseline.json --exclude "examples/**" --exclude "tests/**"
+```
+
+The command reports:
+
+- `active`: baseline entries that still match current findings.
+- `stale`: baseline entries that no longer match current findings.
+- `new`: current findings that are not in the baseline.
+
+Use `--format json` when another script needs the counts or `new_findings` list. The command returns exit code `1` when any new finding is present, and returns `0` when the only drift is stale baseline entries.
+
 ## Ratchet down risk
 
 When a known finding is fixed, remove its entry from `mcp-riskmap-baseline.json` and keep the code change in the same pull request. The baseline should shrink over time.
