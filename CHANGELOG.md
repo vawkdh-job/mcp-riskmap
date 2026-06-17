@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## v0.2.0 - 2026-06-17
+
+### Added
+
+- `--profile local|audit|ci|release` fail policies for common local, CI, and release workflows.
+- `mcp-riskmap baseline` plus `scan --baseline` for gradual adoption in repositories with reviewed existing findings.
+- Copy-paste GitHub Actions examples and baseline ratchet documentation.
+- JSON tool metadata prompt-injection detection for descriptors that define tool descriptions or schema text.
+
 ## v0.1.5 - 2026-06-03
 
 ### Added
@@ -25,15 +34,6 @@
 - Python and JavaScript rules for full process environment passthrough into child processes.
 - Additional MCP config filename support for `claude.json` and `mcp_config.json`.
 - PyPI-first install guidance and updated maintainer release checklist notes.
-
-## v0.1.2 - 2026-06-01
-
-### Added
-
-- `--profile local|audit|ci|release` fail policies for common local, CI, and release workflows.
-- `mcp-riskmap baseline` plus `scan --baseline` for gradual adoption in repositories with reviewed existing findings.
-- Copy-paste GitHub Actions examples and baseline ratchet documentation.
-- JSON tool metadata prompt-injection detection for descriptors that define tool descriptions or schema text.
 
 ## v0.1.2 - 2026-06-01
 
