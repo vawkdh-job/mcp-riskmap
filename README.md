@@ -44,7 +44,7 @@ python -m pip install -e .
 From GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.1.5"
+python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.2.0"
 ```
 
 For development without installing:
