@@ -17,11 +17,12 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add baseline ratchet documentation for repositories with existing findings.
 - Add baseline ratchet audit output for active, stale, and new findings.
 - Reduce filesystem path-input false positives for path construction without file access.
+- Add an initial tool-selection poisoning pattern for JSON tool metadata.
 
 ## v0.3.0
 
 - Refine filesystem path rules with richer language-aware parsing where real MCP examples show gaps.
-- Improve tool metadata checks for MCP prompt-injection and tool-poisoning patterns.
+- Broaden MCP prompt-injection and tool-poisoning metadata checks with examples from real tool descriptors.
 
 ## Later
 

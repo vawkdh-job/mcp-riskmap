@@ -42,6 +42,12 @@ BROAD_CONTEXT_ENV_KEYS = {
     "USERPROFILE",
 }
 BROAD_CONTEXT_KEY_THRESHOLD = 3
+PROMPT_INJECTION_TEXT_RE = re.compile(
+    r"(ignore|disregard|forget)\s+(all\s+)?(previous|prior)\s+(instructions|messages)"
+    r"|system\s+prompt"
+    r"|(always|must)\s+(call|use)\s+this\s+tool\s+(first|before\s+any\s+other\s+tool)",
+    re.IGNORECASE,
+)
 
 
 def is_candidate(path: Path) -> bool:
@@ -67,10 +73,10 @@ def analyze_config(root: Path, path: Path) -> list[Finding]:
                     rule_id="TOOL-DESCRIPTION-INJECTION",
                     title="Tool metadata contains prompt-injection-like wording",
                     severity="medium",
-                    message="Tool metadata includes phrases often used to override model instructions.",
+                    message="Tool metadata includes phrases often used to override model instructions or manipulate tool selection.",
                     path=path_text,
                     line=_line_for(text, metadata_text),
-                    remediation="Keep tool names, descriptions, and schemas factual; remove instructions that target the model control plane.",
+                    remediation="Keep tool names, descriptions, and schemas factual; remove instructions that target the model control plane or tool invocation priority.",
                     evidence=metadata_text[:240],
                 )
             )
@@ -213,9 +219,8 @@ def _collect_tool_metadata_strings(value: Any, strings: list[str]) -> None:
 
 
 def _looks_like_prompt_injection(text: str) -> bool:
-    lowered = text.lower()
     # mcp-riskmap: ignore TOOL-DESCRIPTION-INJECTION
-    return "ignore previous" in lowered or "system prompt" in lowered
+    return bool(PROMPT_INJECTION_TEXT_RE.search(text))
 
 
 def _line_for(text: str, needle: str) -> int:
