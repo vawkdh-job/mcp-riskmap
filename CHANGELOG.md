@@ -5,6 +5,7 @@
 ### Added
 
 - `mcp-riskmap baseline-check` for baseline ratchet audits that report active, stale, and new findings.
+- Tool metadata detection for descriptions that try to force model tool-selection order, such as always calling a tool before any other tool.
 
 ### Fixed
 
