@@ -11,16 +11,20 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add unsafe filesystem path input candidate rules for Python and JavaScript.
 - Add full environment passthrough rules for Python and JavaScript child processes.
 - Add support for additional MCP client config names such as `claude.json` and `mcp_config.json`.
+- Add severity profiles for local, audit, CI, and release use.
+- Add baseline creation and baseline-filtered scans for gradual adoption.
+- Add CI examples for consuming `mcp-riskmap` from other repositories.
+- Add baseline ratchet documentation for repositories with existing findings.
 
 ## v0.2.0
 
-- Add CI examples for consuming `mcp-riskmap` from other repositories.
+- Add release notes and verification steps for the profile and baseline workflow.
 - Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
 
 ## v0.3.0
 
-- Add severity profiles for local development, CI, and release blocking.
-- Add SARIF baseline guidance for maintainers who want to ratchet down existing findings.
+- Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
+- Improve tool metadata checks for MCP prompt-injection and tool-poisoning patterns.
 
 ## Later
 

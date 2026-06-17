@@ -68,6 +68,63 @@ class CliTests(unittest.TestCase):
         self.assertNotIn("fixtures/server.py", finding_paths)
         self.assertIn("live/server.py", finding_paths)
 
+    def test_scan_profile_ci_fails_on_high_findings(self):
+        stdout = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text("import subprocess\nsubprocess.run(command, shell=True)\n", encoding="utf-8")
+
+            with redirect_stdout(stdout):
+                code = main(["scan", str(root), "--profile", "ci", "--format", "json"])
+
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(1, code)
+        self.assertIn("PY-SHELL-TRUE", {finding["rule_id"] for finding in data["findings"]})
+
+    def test_scan_profile_local_does_not_fail_on_findings(self):
+        stdout = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text("import subprocess\nsubprocess.run(command, shell=True)\n", encoding="utf-8")
+
+            with redirect_stdout(stdout):
+                code = main(["scan", str(root), "--profile", "local", "--format", "json"])
+
+        self.assertEqual(0, code)
+
+    def test_scan_baseline_filters_existing_findings_but_keeps_new_findings(self):
+        stdout = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline_path = root / "mcp-riskmap-baseline.json"
+            (root / "known.py").write_text("import subprocess\nsubprocess.run(command, shell=True)\n", encoding="utf-8")
+
+            with redirect_stdout(io.StringIO()):
+                baseline_code = main(["baseline", str(root), "--output", str(baseline_path)])
+
+            (root / "new.py").write_text("import subprocess\nsubprocess.run(command, shell=True)\n", encoding="utf-8")
+
+            with redirect_stdout(stdout):
+                scan_code = main(
+                    [
+                        "scan",
+                        str(root),
+                        "--baseline",
+                        str(baseline_path),
+                        "--format",
+                        "json",
+                        "--fail-on",
+                        "high",
+                    ]
+                )
+
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(0, baseline_code)
+        self.assertEqual(1, scan_code)
+        finding_paths = {finding["path"] for finding in data["findings"]}
+        self.assertNotIn("known.py", finding_paths)
+        self.assertIn("new.py", finding_paths)
+
 
 if __name__ == "__main__":
     unittest.main()

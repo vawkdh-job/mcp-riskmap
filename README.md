@@ -24,6 +24,7 @@ MCP servers often expose tools that can touch files, shells, networks, credentia
 - JavaScript `child_process.exec` and `spawn(..., { shell: true })`
 - Python and JavaScript filesystem access that appears to use user-controlled path input
 - Tool text that looks like model-control prompt injection
+- JSON tool metadata that looks like prompt-injection or tool-poisoning text
 - Missing `AGENTS.md`, `SECURITY.md`, or `LICENSE`
 
 ## Install
@@ -62,11 +63,27 @@ mcp-riskmap scan . --format json
 mcp-riskmap scan . --format markdown --output report.md
 mcp-riskmap scan . --format sarif --output results.sarif --fail-on high
 mcp-riskmap scan . --exclude "examples/**" --exclude "tests/**"
+mcp-riskmap scan . --profile ci
+mcp-riskmap baseline . --output mcp-riskmap-baseline.json
+mcp-riskmap scan . --baseline mcp-riskmap-baseline.json --profile ci
 ```
 
 `--fail-on high` returns exit code `1` when at least one finding is high or critical.
 
 Use `--exclude` for reviewed fixture directories, generated output, or intentionally unsafe examples that should not block CI.
+
+Use `--profile` for common fail policies:
+
+- `local`: report findings without failing.
+- `audit`: report findings without failing, intended for review artifacts.
+- `ci`: fail on high or critical findings.
+- `release`: fail on medium, high, or critical findings.
+
+`--fail-on` overrides the selected profile.
+
+Use `baseline` when adopting `mcp-riskmap` in a repository that already has reviewed findings. The baseline records current findings, and `scan --baseline` reports only findings that are not already in the baseline.
+
+See [docs/baseline-ratchet.md](docs/baseline-ratchet.md) for the recommended baseline workflow.
 
 ## Examples
 
@@ -139,6 +156,8 @@ jobs:
           sarif_file: mcp-riskmap.sarif
 ```
 
+Additional copy-paste workflows are available in [docs/ci-examples](docs/ci-examples/).
+
 ## Safety stance
 
 `mcp-riskmap` does not execute MCP servers. It reads files and reports static findings. That means it will miss runtime-only behavior, but it is safer for quick review of unknown configs and pull requests.
@@ -170,6 +189,7 @@ Some MCP scanners inspect live tool descriptions by starting configured servers.
 
 - Add CI examples for consuming `mcp-riskmap` from other repositories.
 - Add rule severity profiles.
+- Improve tool metadata checks for MCP prompt-injection and tool-poisoning patterns.
 - Add Semgrep-compatible pattern export.
 
 See [ROADMAP.md](ROADMAP.md) for issue-sized milestones.
