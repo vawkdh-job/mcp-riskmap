@@ -8,7 +8,6 @@ from mcp_riskmap.models import Finding
 
 FILESYSTEM_OP_RE = re.compile(
     r"\bfs\.(readFile|readFileSync|writeFile|writeFileSync|rm|rmSync|unlink|unlinkSync|readdir|createReadStream|createWriteStream)\s*\("
-    r"|\bpath\.join\s*\("
     r"|\bsendFile\s*\("
 )
 USER_PATH_RE = re.compile(

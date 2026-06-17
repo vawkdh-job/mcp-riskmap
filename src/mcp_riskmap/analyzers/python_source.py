@@ -9,7 +9,8 @@ from mcp_riskmap.models import Finding
 SHELL_TRUE_RE = re.compile(r"subprocess\.(run|call|Popen|check_call|check_output)\s*\([^)]*shell\s*=\s*True")
 EVAL_EXEC_RE = re.compile(r"\b(eval|exec)\s*\(")
 FILESYSTEM_OP_RE = re.compile(
-    r"\b(open|Path)\s*\("
+    r"\bopen\s*\("
+    r"|\bPath\s*\([^)]*\)\s*\.\s*(read_text|write_text|read_bytes|write_bytes|unlink|rmdir)\s*\("
     r"|\.(read_text|write_text|read_bytes|write_bytes|unlink|rmdir)\s*\("
     r"|\b(shutil\.(copy|copyfile|copytree|move|rmtree)|os\.(remove|unlink|rmdir|rename|replace))\s*\("
 )

@@ -117,6 +117,41 @@ class ScannerTests(unittest.TestCase):
         self.assertNotIn("PY-FILE-PATH-INPUT", rule_ids)
         self.assertNotIn("JS-FILE-PATH-INPUT", rule_ids)
 
+    def test_scan_path_does_not_flag_path_construction_without_filesystem_access(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "server.py").write_text(
+                textwrap.dedent(
+                    """
+                    from pathlib import Path
+
+                    def normalize_tool(request):
+                        candidate = Path(request.params["filename"]).name
+                        return {"name": candidate}
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+            (root / "server.js").write_text(
+                textwrap.dedent(
+                    """
+                    const path = require("path");
+
+                    function normalizeTool(req) {
+                      const candidate = path.join(baseDir, req.query.file);
+                      return { name: path.basename(candidate) };
+                    }
+                    """
+                ).strip(),
+                encoding="utf-8",
+            )
+
+            result = scan_path(root)
+
+        rule_ids = {finding.rule_id for finding in result.findings}
+        self.assertNotIn("PY-FILE-PATH-INPUT", rule_ids)
+        self.assertNotIn("JS-FILE-PATH-INPUT", rule_ids)
+
     def test_scan_path_detects_process_environment_passthrough(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

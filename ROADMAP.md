@@ -16,14 +16,11 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 - Add CI examples for consuming `mcp-riskmap` from other repositories.
 - Add baseline ratchet documentation for repositories with existing findings.
 - Add baseline ratchet audit output for active, stale, and new findings.
-
-## v0.2.x
-
-- Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
+- Reduce filesystem path-input false positives for path construction without file access.
 
 ## v0.3.0
 
-- Refine filesystem path rules with lower-false-positive parsing where real MCP examples show gaps.
+- Refine filesystem path rules with richer language-aware parsing where real MCP examples show gaps.
 - Improve tool metadata checks for MCP prompt-injection and tool-poisoning patterns.
 
 ## Later
