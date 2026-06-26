@@ -20,12 +20,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: vawkdh-job/mcp-riskmap@v0.1.5
+      - uses: vawkdh-job/mcp-riskmap@v0.2.1
         with:
           path: .
           format: sarif
           output: results.sarif
-          fail-on: high
+          profile: ci
           exclude: |
             examples/**
             tests/**
@@ -35,7 +35,7 @@ jobs:
           sarif_file: results.sarif
 ```
 
-Use `--exclude` or the action's `exclude` input for reviewed fixture directories, generated output, or intentionally unsafe examples.
+Use `--exclude` or the action's `exclude` input for reviewed fixture directories, generated output, or intentionally unsafe examples. Use the action's `profile` input for common fail policies, and `baseline` when adopting the scanner in a repository that already has reviewed findings.
 
 For direct CLI use in CI, use a profile instead of repeating a fail threshold:
 

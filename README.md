@@ -44,7 +44,7 @@ python -m pip install -e .
 From GitHub:
 
 ```bash
-python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.2.0"
+python -m pip install "git+https://github.com/vawkdh-job/mcp-riskmap.git@v0.2.1"
 ```
 
 For development without installing:
@@ -61,7 +61,7 @@ python -m mcp_riskmap.cli --version
 mcp-riskmap scan .
 mcp-riskmap scan . --format json
 mcp-riskmap scan . --format markdown --output report.md
-mcp-riskmap scan . --format sarif --output results.sarif --fail-on high
+mcp-riskmap scan . --format sarif --output results.sarif --profile ci
 mcp-riskmap scan . --exclude "examples/**" --exclude "tests/**"
 mcp-riskmap scan . --profile ci
 mcp-riskmap baseline . --output mcp-riskmap-baseline.json
@@ -69,7 +69,7 @@ mcp-riskmap baseline-check . --baseline mcp-riskmap-baseline.json
 mcp-riskmap scan . --baseline mcp-riskmap-baseline.json --profile ci
 ```
 
-`--fail-on high` returns exit code `1` when at least one finding is high or critical.
+`--profile ci` returns exit code `1` when at least one finding is high or critical.
 
 Use `--exclude` for reviewed fixture directories, generated output, or intentionally unsafe examples that should not block CI.
 
@@ -144,12 +144,12 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v6
-      - uses: vawkdh-job/mcp-riskmap@v0.1.5
+      - uses: vawkdh-job/mcp-riskmap@v0.2.1
         with:
           path: .
           format: sarif
           output: mcp-riskmap.sarif
-          fail-on: high
+          profile: ci
           exclude: |
             examples/**
             tests/**
@@ -190,8 +190,6 @@ Some MCP scanners inspect live tool descriptions by starting configured servers.
 
 ## Roadmap
 
-- Add CI examples for consuming `mcp-riskmap` from other repositories.
-- Add rule severity profiles.
 - Improve tool metadata checks for MCP prompt-injection and tool-poisoning patterns.
 - Add Semgrep-compatible pattern export.
 
