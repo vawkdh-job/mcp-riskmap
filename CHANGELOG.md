@@ -2,14 +2,18 @@
 
 ## Unreleased
 
+## v0.2.1 - 2026-06-26
+
 ### Added
 
 - `mcp-riskmap baseline-check` for baseline ratchet audits that report active, stale, and new findings.
 - Tool metadata detection for descriptions that try to force model tool-selection order, such as always calling a tool before any other tool.
+- GitHub Action inputs for `profile` and `baseline` so action users can adopt the same CI and ratchet workflow as the CLI.
 
 ### Fixed
 
 - Reduce filesystem path-input false positives for Python `Path(...)` and JavaScript `path.join(...)` calls that only construct paths without reading, writing, moving, or deleting files.
+- Refresh GitHub Action and Code Scanning examples to the current release and profile-based CI guidance.
 
 ## v0.2.0 - 2026-06-17
 

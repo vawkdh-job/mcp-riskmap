@@ -21,11 +21,13 @@ This roadmap is intentionally issue-sized so contributors can pick up small impr
 
 ## v0.3.0
 
-- Refine filesystem path rules with richer language-aware parsing where real MCP examples show gaps.
-- Broaden MCP prompt-injection and tool-poisoning metadata checks with examples from real tool descriptors.
+- Detect multiline Python and JavaScript shell-execution patterns. See [#28](https://github.com/vawkdh-job/mcp-riskmap/issues/28).
+- Reuse tool-selection poisoning detection in source analyzers. See [#29](https://github.com/vawkdh-job/mcp-riskmap/issues/29).
+- Add repo-hygiene controls for subdirectory and demo scans. See [#31](https://github.com/vawkdh-job/mcp-riskmap/issues/31).
 
 ## Later
 
-- Add Semgrep-compatible pattern export.
+- Make baseline identity less sensitive to line-number drift. See [#30](https://github.com/vawkdh-job/mcp-riskmap/issues/30).
+- Add Semgrep-compatible pattern export. See [#32](https://github.com/vawkdh-job/mcp-riskmap/issues/32).
 - Add optional high-entropy secret checks.
 - Add richer language-aware parsing where it materially reduces false positives.

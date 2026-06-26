@@ -22,6 +22,14 @@ inputs:
     description: Fail when a finding is at or above this severity.
     required: false
     default: ""
+  profile:
+    description: Common fail policy: local, audit, ci, or release. Ignored when fail-on is set.
+    required: false
+    default: ""
+  baseline:
+    description: Baseline JSON file used to report only findings that are not already reviewed.
+    required: false
+    default: ""
   exclude:
     description: Newline-separated relative path globs to exclude.
     required: false
@@ -51,6 +59,14 @@ runs:
 
         if [ -n "${{ inputs.fail-on }}" ]; then
           args+=(--fail-on "${{ inputs.fail-on }}")
+        fi
+
+        if [ -n "${{ inputs.profile }}" ]; then
+          args+=(--profile "${{ inputs.profile }}")
+        fi
+
+        if [ -n "${{ inputs.baseline }}" ]; then
+          args+=(--baseline "${{ inputs.baseline }}")
         fi
 
         while IFS= read -r pattern; do
